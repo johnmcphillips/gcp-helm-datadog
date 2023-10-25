@@ -1,0 +1,17 @@
+options:
+  pool: 
+    name: 'projects/$PROJECT_ID/locations/$ZONE/workerPools/$PRIVATE_POOL'
+steps:
+  - name: 'gcr.io/cloud-builders/kubectl'
+    env:
+    - 'CLOUDSDK_COMPUTE_ZONE=$ZONE'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=$CLUSTER_NAME'
+    - 'KUBECONFIG=/workspace/.kube/config'
+    args: ['cluster-info']
+
+  - name: 'gcr.io/$PROJECT_ID/helm'
+    args: ['upgrade', '--install', '-f', './values.yaml', 'datadog-agent', 'datadog/datadog']    
+    env:
+      - 'KUBECONFIG=/workspace/.kube/config'
+      - 'HELM_REPO_NAME=datadog'
+      - 'HELM_REPO_URL=https://helm.datadoghq.com'
