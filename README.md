@@ -1,4 +1,4 @@
-# Datadog Helm GEK Deployment
+# Datadog Helm GKE Deployment using Cloudbuild
 
 # Requires Community Built Helm Cloudbuilder image
     https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/helm
