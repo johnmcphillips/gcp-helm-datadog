@@ -1,22 +1,28 @@
+targetSystem: "linux"
 datadog:
   apiKeyExistingSecret: datadog-secret
-  aappKeyExistingSecret: datadog-secret
-  clusterName: $CLUSTER_NAME
-  env:
-    - name: DD_APM_FEATURES
-      value: 'enable_cid_stats'
-
+  appKeyExistingSecret: datadog-secret
+  clusterName: <GKE Autopilot Cluster name>
+  site: datadoghq.com
+  logLevel: INFO
+  clusterChecks:
+    # datadog.clusterChecks.enabled -- Enable the Cluster Checks feature on both the cluster-agents and the daemonset
+    enabled: true
+    # datadog.clusterChecks.shareProcessNamespace -- Set the process namespace sharing on the cluster checks agent
+    shareProcessNamespace: false
+  tags: 
+    - env:envtag
+    - datadog:monitored
+ 
   logs:
     enabled: true
     containerCollectAll: true
   apm:
-    socketEnabled: true
     portEnabled: true
-
+    port: 8126 # default
   processAgent:
     enabled: true
     processCollection: true
-
   # Enable the new `kubernetes_state_core` check.
   kubeStateMetricsCore:
     enabled: true
@@ -24,8 +30,28 @@ datadog:
   # The new `kubernetes_state_core` doesn't require to deploy the kube-state-metrics anymore.
   kubeStateMetricsEnabled: false
 
+  confd:
+    apache.yaml: |-
+      ad_identifiers:
+        - <CONTAINERNAME>
+      init_config:
+      instances:
+        - apache_status_url: "http://%%host%%/server-status?auto"
+      tls_verify: false
+      logs:
+        - type: file
+          path: /var/log/apache2/access.log
+          service: apache
+          source: apache
+        - type: file
+          path: /var/log/apache2/error.log
+          service: apache
+          source: apache
+
 clusterAgent:
-  enabled: true
+  admissionController:
+    enabled: true
+    replicas: 2
   metricsProvider:
     enabled: true
      
